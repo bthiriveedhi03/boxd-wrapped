@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boxd Wrapped</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+  <!-- shared hand-drawn defs (wobble filter lives inside the card too, for export) -->
+  <main id="app">
+    <section id="landing" class="landing">
+      <div class="hero">
+        <div class="hero-doodles" aria-hidden="true"></div>
+        <h1>your month in film,<br><span class="scribble-under">wrapped</span></h1>
+        <p class="lede">Type your Letterboxd username and get a hand-drawn 16:9 recap of your month — stats, favourite film, best reviews and all.</p>
+        <form id="form" class="user-form" autocomplete="off">
+          <label for="username" class="sr-only">Letterboxd username</label>
+          <div class="input-wrap">
+            <span class="at">@</span>
+            <input id="username" name="username" placeholder="your username" spellcheck="false" required>
+          </div>
+          <button type="submit" class="btn primary">make my wrapped →</button>
+        </form>
+        <p class="hint">or <a href="#" id="demo-link">peek at a demo</a> · works with any public profile</p>
+        <p id="error" class="error" role="alert" hidden></p>
+      </div>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <div class="toolbar">
+        <button class="btn ghost" id="back">← new username</button>
+        <label class="month-pick">month
+          <select id="month"></select>
+        </label>
+        <button class="btn primary" id="download">download PNG ↓</button>
+      </div>
+      <p id="note" class="note" hidden></p>
+      <div id="stage" class="stage"><div id="card-holder"></div></div>
+    </section>
+
+    <div id="loading" class="loading" hidden>
+      <div class="spinner-reel" aria-hidden="true"></div>
+      <p>rummaging through your diary…</p>
+    </div>
+  </main>
+
+  <script src="/vendor/rough.js"></script>
+  <script src="/vendor/html-to-image.js"></script>
+  <script src="/doodles.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
