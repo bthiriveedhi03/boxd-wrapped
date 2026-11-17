@@ -31,8 +31,9 @@
       if (!r.ok) throw new Error(data.error || 'Could not load that profile.');
       if (!data.entries.length) throw new Error('That profile has no public diary entries yet.');
       feed = data;
-      setupMonths();
-      showResult();
+      const ms = months();
+      const wanted = new URLSearchParams(location.search).get('m');
+      openStory(ms.includes(wanted) ? wanted : ms[0]);
     } catch (e) {
       showLanding();
       $('#error').textContent = e.message;
@@ -40,17 +41,6 @@
     } finally {
       $('#loading').hidden = true;
     }
-  }
-
-  function setupMonths() {
-    const months = [...new Set(feed.entries.map(e => e.watchedDate.slice(0, 7)))].sort().reverse();
-    const params = new URLSearchParams(location.search);
-    const wanted = params.get('m');
-    $('#month').innerHTML = months.map(m => {
-      const [y, mo] = m.split('-');
-      return `<option value="${m}">${MONTHS[+mo - 1]} ${y}</option>`;
-    }).join('');
-    $('#month').value = months.includes(wanted) ? wanted : months[0];
   }
 
   function computeStats(month) {
@@ -252,61 +242,37 @@
     });
   }
 
-  function fit() {
-    const holder = $('#card-holder');
-    const card = $('#card');
-    if (!card) return;
-    const scale = Math.min(1, $('#stage').clientWidth / 1920);
-    card.style.transform = `scale(${scale})`;
-    holder.style.height = 1080 * scale + 'px';
-    holder.style.width = 1920 * scale + 'px';
+  // ---------- story ----------
+  function months() {
+    return [...new Set(feed.entries.map(e => e.watchedDate.slice(0, 7)))].sort().reverse();
   }
 
-  function render() {
-    const month = $('#month').value;
+  function openStory(month) {
     const s = computeStats(month);
-    $('#card-holder').innerHTML = renderCard(s);
-    roughen($('#card'), s);
-    fit();
-
-    // the RSS feed only holds recent entries; warn if this month might be cut off
     const oldest = feed.entries.reduce((a, e) => (e.watchedDate < a ? e.watchedDate : a), '9999');
-    const note = $('#note');
-    note.hidden = !(oldest.startsWith(month) && feed.entries.length >= 45);
-    note.textContent = 'Heads up: Letterboxd’s public feed only goes back ~50 entries, so the start of this month may be missing.';
-
     const url = new URL(location.href);
     url.searchParams.set('u', feed.username); url.searchParams.set('m', month);
     history.replaceState(null, '', url);
+    $('#landing').hidden = true;
+    window.Story.open({
+      feed, s, month, months: months(),
+      truncated: oldest.startsWith(month) && feed.entries.length >= 45,
+      onMonth: openStory,
+      onClose: showLanding,
+    });
   }
 
-  function showResult() { $('#landing').hidden = true; $('#result').hidden = false; render(); }
-  function showLanding() { $('#landing').hidden = false; $('#result').hidden = true; history.replaceState(null, '', location.pathname); }
+  function showLanding() {
+    window.Story.close();
+    $('#landing').hidden = false;
+    history.replaceState(null, '', location.pathname);
+  }
 
   // ---------- events ----------
   $('#form').addEventListener('submit', e => { e.preventDefault(); load($('#username').value.trim().replace(/^@/, '')); });
   $('#demo-link').addEventListener('click', e => { e.preventDefault(); load('demo'); });
-  $('#back').addEventListener('click', showLanding);
-  $('#month').addEventListener('change', render);
-  window.addEventListener('resize', fit);
 
-  $('#download').addEventListener('click', async () => {
-    const btn = $('#download');
-    const card = $('#card');
-    btn.disabled = true; btn.textContent = 'developing film…';
-    try {
-      await document.fonts.ready;
-      const png = await htmlToImage.toPng(card, { width: 1920, height: 1080, pixelRatio: 1, style: { transform: 'none' }, cacheBust: false });
-      const a = document.createElement('a');
-      a.download = `${feed.username}-${$('#month').value}-wrapped.png`;
-      a.href = png; a.click();
-    } catch (err) {
-      console.error(err);
-      alert('Could not export the image — try again in a moment.');
-    } finally {
-      btn.disabled = false; btn.textContent = 'download PNG ↓';
-    }
-  });
+  window.Wrapped = { computeStats, renderCard, roughen, poster, funFacts, MONTHS, DAYS, esc };
 
   const startUser = new URLSearchParams(location.search).get('u');
   if (startUser) { $('#username').value = startUser; load(startUser); }

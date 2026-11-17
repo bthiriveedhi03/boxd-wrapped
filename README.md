@@ -1,12 +1,18 @@
 # Boxd Wrapped 🎬
 
-Type a Letterboxd username, get a hand-drawn **16:9 (1920×1080) monthly wrapped** you can download as a PNG.
+Type a Letterboxd username and get an animated, hand-drawn monthly wrapped: tap-through story slides (like Spotify Wrapped) that end on a **16:9 (1920×1080) summary card** you can save or share.
+
+Slides fill the screen: 16:9 on desktop/landscape, vertical 9:16 on a phone held upright.
+Tap right to go forward, left to go back, hold to pause (arrow keys / Esc on desktop).
 
 ```bash
 npm start      # http://localhost:3000  — needs Node 18+, no npm install required
 ```
 
 Try the username `demo` to see it with sample data.
+
+## Slides
+intro → films watched (poster rain) → diary calendar → average rating + histogram → hearts & rewatches → fun facts → film of the month → top reviews → the summary card
 
 ## What's on the card
 - films watched, average rating, films hearted, rewatches (sketchy rough.js tiles)
